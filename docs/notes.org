@@ -1,0 +1,200 @@
+#+TITLE: LSP-server notes
+#+STARTUP: indent
+#+TODO: TODO(t) STARTED(s) | DONE(d) SKIP(s)
+
+* Resources
+** https://microsoft.github.io/language-server-protocol/
+*** [[https://microsoft.github.io/language-server-protocol/specifications/specification-current/][specification-current]]
+** https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+"This guide will teach you how to build a Language Client / Server
+using our Node SDK. The remaining document assumes that you are
+familiar with VS Code Extension API."
+** [[https://en.wikipedia.org/wiki/Language_Server_Protocol][Wikipedia: Language Server Protocol]]
+
+* Ideas
+Misc ideas that are less obvious than the tasks below, may turn out to be bad or difficult.
+** Indicate when a variable is captured in inner function scopes on hover
+** Allow documenting table-like keyword arguments
+Syntax idea:
+#+begin_src lua
+--@param someItem int <docs>
+--@param flags.someFlag
+--@param flags.otherFlag
+local function f(someItem, flags)
+#+end_src
+** Add "safe" document locations for reparsing
+During parsing, find bookmarks that allow reparsing from a certain point
+** Preserve tokens in document representation
+Maybe the document could be managed more efficiently if tokens were
+preserved. Perhaps some edits could be known to be benign and
+structures updated, ranges offset and so on.
+
+However this is probably extremely complicated compared to just
+reparsing.
+
+* Tasks
+** Lua
+*** TODO Support operators
+Add support for expressions like
+#+begin_src lua
+1 + 2
+1 * 1
+true ~= false
+#+end_src
+Retain types based on input and operator.
+*** TODO Make function arguments available in function scope
+Function arguments should be available in the scope for a function
+*** TODO Remove deleted globals from g_env
+*** TODO Fix indexed parsing
+Find all segments *up to the one* the cursor is at, not always up to the
+final segment, e.g.
+
+: abc.d|ef.ghi
+should yield
+: abc.def
+not
+: abc.def.ghi
+*** TODO Fix crash
+#+begin_example
+Process luk-server stderr finished
+Traceback (most recent call last):
+  File "c:/dev/lsp/run_lua_server.py", line 3, in <module>
+    lua_server.run()
+  File "c:\dev\lsp\lua\lua_server.py", line 35, in run
+    exit_code = lsp_io_server.run(db, log)
+  File "c:\dev\lsp\lsp_server\lsp_io_server.py", line 25, in run
+    response = lsp_state.method(content)
+  File "c:\dev\lsp\lsp_server\lsp_state.py", line 52, in method
+    return self._textDocument_didChange(content)
+  File "c:\dev\lsp\lsp_server\lsp_state.py", line 239, in _textDocument_didChange
+    self.db.didChange(doc)
+  File "c:\dev\lsp\lua\lua_db.py", line 379, in didChange
+    lua_doc = read_lua(text, self.g_env, doc.uri)
+  File "c:\dev\lsp\lua\build_lua_doc.py", line 16, in read_lua
+    scopes = find_scopes(tokens, g_env, file_path)
+  File "c:\dev\lsp\lua\scope.py", line 753, in find_scopes
+    resolve_token(st)
+  File "c:\dev\lsp\lua\scope.py", line 700, in resolve_token
+    resolve_indexed_assign(st, index_list)
+  File "c:\dev\lsp\lua\scope.py", line 665, in resolve_indexed_assign
+    target[name] = value
+TypeError: 'Function' object does not support item assignment
+#+end_example
+
+for
+#+begin_src lua
+Aditya.audre.|
+x = mega.more_functions.f3()
+#+end_src
+** LSP
+*** DONE JSON-RPC message parsing
+**** DONE Header parsing
+**** DONE Content parsing
+*** STARTED Initialize Request
+**** DONE Handle Initialize Request
+**** TODO Report errors on incorrect client behavior
+**** TODO etc?
+*** DONE Initialized notification
+*** DONE Shutdown Request
+- Check if done
+*** DONE Exit Notification
+- Check if done
+*** SKIP LogTrace Notification
+- Do I need this?
+*** SKIP ShowMessage Notification
+"The show document request is sent from a server to a client to ask the
+client to display a particular document in the user interface."
+Skip for now, new in 3.16.0
+*** TODO LogMessage Notification
+*** TODO Work Done Progress
+*** SKIP Telemetry Notification
+*** SKIP Dynamic capability registration
+**** SKIP Register Capability
+**** SKIP Unregister Capability
+*** TODO Workspaces
+**** TODO workspace/workspaceFolders request
+[[https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_workspaceFolders][Specification]]
+**** TODO workspace/didChangeWorkspaceFolders
+[[https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_didChangeWorkspaceFolders][Specification]]
+**** TODO workspace/configuration
+**** TODO workspace/didChangeConfiguration
+**** TODO workspace/didChangeWatchedFiles
+**** TODO workspace/symbol
+[[ https://microsoft.github.io/language-server-protocol/specifications/specification-current/#workspace_symbol][Specification]]
+**** TODO workspace/executeCommand
+**** TODO workspace/applyEdit
+**** TODO workspace/willCreateFiles
+**** TODO workspace/didCreateFiles
+**** TODO workspace/willRenameFiles
+**** TODO workspace/didRenameFiles
+**** TODO workspace/willDeleteFiles
+**** TODO workspace/didDeleteFiles
+*** STARTED Text Document Synchronization
+**** DONE textDocumentSync server capability
+(Incremental)
+**** STARTED textDocument/didOpen notification
+**** STARTED textDocument/didChange notification
+**** TODO textDocument/willsave notification
+**** TODO textDocument/willSaveWaitUntil
+**** TODO textDocument/didSave
+**** STARTED textDocument/didClose
+*** TODO Diagnostics
+**** ...
+*** STARTED Completion
+**** STARTED textDocument/completion
+**** TODO Snippets, tab-stops etc
+**** ...
+*** STARTED textDocument/hover
+*** STARTED textDocument/signatureHelp
+*** TODO textDocument/declaration
+*** STARTED textDocument/definition
+*** STARTED textDocument/typeDefinition
+*** TODO textDocument/implementation
+*** TODO textDocument/references
+*** TODO textDocument/documentHighlight
+*** TODO textDocument/documentSymbol
+*** TODO textDocument/codeAction
+*** TODO textDocument/codeLens
+*** STARTED textDocument/documentLink
+*** TODO textDocument/documentColor
+*** TODO textDocument/formatting
+*** TODO textDocument/rangeFormatting
+*** TODO textDocument/onTypeFormatting
+*** TODO textDocument/rename
+*** TODO textDocument/prepareRename
+*** TODO textDocument/foldingRange
+*** TODO textDocument/selectionRange
+*** SKIP textDocument/callHierarchy
+Added in 3.16, skip for now (useful feature though).
+*** SKIP Semantic tokens
+Added in 3.16, skip for now.
+*** SKIP Linked editing request
+Added in 3.16, skip for now
+*** SKIP Monikers
+Added in 3.16, skip for now.
+** Implementation considerations
+*** TODO Command line
+"Servers usually support different communication channels (e.g. stdio,
+pipes, …). To easy the usage of servers in different clients it is
+highly recommended that a server implementation supports the following
+command line arguments to pick the communication channel:
+stdio, +pipe+, socket, +node-ipc+"
+*** DONE support stdio
+*** TODO support sockets
+** Misc
+*** TODO Threaded parsing
+Run parsing and updates in a separate thread from the I/O so the I/O
+can always respond.
+Make the updates and completion requests cancellable.
+*** TODO Use lsp_defs classes for everything
+Align them more closely with the LSP interfaces
+** Clients
+*** STARTED emacs client
+**** TODO Workspace handling
+**** TODO lua-mode hook
+(Not done yet because it's impractical while testing the rather
+unstable server)
+*** TODO vscode
+I mostly work in emacs, but vscode is nicer for testing the
+capabilities of a language server.
+*** STARTED Python test client

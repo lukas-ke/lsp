@@ -1,0 +1,6 @@
+#+TITLE: testdata/
+
+Lua-files used in tests. The tests verify that parsing these files
+results in correct data/type structures and completion behavior etc.
+
+For more of a sandbox of lua-files refer to [[file:../workspace][workspace]].

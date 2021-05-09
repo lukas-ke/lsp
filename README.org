@@ -1,0 +1,56 @@
+#+TITLE: Experimental LSP-server in Python
+#+STARTUP: indent
+
+An attempt at learning a bit about the LSP-protocol by implementing an
+LSP-server in Python.
+
+Requires Python >= 3.8.
+
+The bulk of the code implements a poor language server for the Lua
+programming language. *Note:* If you want proper lua completion you
+won't currently find it here!
+
+See progress notes in [[file:docs/notes.org][docs/notes.org]].
+
+* Features
+- Instability
+- Inept parsing
+- Bugs
+- Unreliable completion
+- Poor performance
+* Running the Lua server
+Run ~run_lua_server.py~
+
+It reads LSP-commands on standard input. (Note: It is probably more
+useful to launch it from an lsp-client).
+* Using the Lua language server in Emacs
+1. Install the ~lua-mode~ package from melpa.
+
+2. Install the ~lsp-mode~ package
+   https://github.com/emacs-lsp/lsp-mode
+   (I used version ~20210521.446~ from melpa)
+
+3. Load the file [[file:clients/emacs/luk-lsp.el][clients/emacs/luk-lsp.el]]
+   Either..
+   - .. evaluate it:
+     : M-x eval-buffer
+   - .. or add its folder to your load-path and require it:
+   #+begin_src emacs-lisp
+   (add-to-list 'load-path "<some-path>/lsp/clients/emacs")
+   (require 'luk-lsp)
+   (luk-lsp-setup-keys) ;; Optional, defines some keys for lua-mode
+   #+end_src
+
+4. Open a lua file in [[file:test/workspace][test/workspace]] and run ~M-x lsp~
+  - Try auto-completion with ~M-,~ or after entering a dot (~.~).
+  - Try the signature help by writing the leading parenthesis after
+    a function name
+  - Try ~C-c g~ for go to definition
+* Using the server in VSCode: PENDING
+* Using the test client
+Run lsp_io_client.py like this:
+: python -m clients.lsp_io_client
+* Running tests
+  Run
+  : python -m test.test_all
+  (from the repository root folder)
