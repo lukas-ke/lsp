@@ -8,14 +8,12 @@ from lsp_server import lsp_io_server
 
 
 def get_workspace_dir():
-    # Hack: Allow starting with workspace/ as cwd or the root dir lsp/
-    # to let lsp_io_client and luk-lsp in emacs both work (for now)
-    workspace_dir = Path("test/workspace")
-    if workspace_dir.exists():
-        return workspace_dir.absolute()
-    else:
-        assert Path("../workspace").exists()
-        return Path(".").absolute()
+    # Hardcoded path for require etc.
+    # TODO: Determine in some other way (e.g. proper workspace
+    # support)
+    workspace_dir = Path(__file__).parent.parent/"test/workspace"
+    assert workspace_dir.exists()
+    return workspace_dir.absolute()
 
 
 def create_db(log):
