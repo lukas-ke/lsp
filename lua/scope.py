@@ -18,10 +18,12 @@ from . import annotations
 
 
 class LuaError(Exception):
+    """Raised for Lua syntax errors"""
     pass
 
 
 class TODOError(Exception):
+    """Raised for incomplete features in the parser"""
     pass
 
 
@@ -31,10 +33,6 @@ class Name(LuaItem):  # TODO: Needed?
 
     def __str__(self):
         return self.t.value
-
-
-def comma_sep(items):
-    return ", ".join([str(item) for item in items])
 
 
 class State:
@@ -118,13 +116,12 @@ def resolve_field(st, comment=None):
     if not peek_assign(st):
         raise LuaError(f"Invalid field? {name_token.value}")
     st.take()
-
     return resolve_rhs(st, comment)
 
 
 def resolve_table(st):
     opening_brace = st.take()
-    assert opening_brace.value == "{"
+    assert opening_brace.value == "{", "Resolve table called without opening brace"
 
     # TODO: Handle list tables too
 
@@ -466,6 +463,8 @@ def describe_name_or_index(name_or_index):
         return ".".join(index)
     else:
         assert False, f"Wrong type {name_or_index.__class__} passed to name_or_index"
+
+
 def resolve_arg_list(st):
     if not eat_lparen(st):
         raise LuaError("Missing argument list")
@@ -532,7 +531,7 @@ def resolve_function(st, comment=None):
 
 
 def resolve_anonymous_function(st, comment):
-    assert peek_function(st)
+    assert peek_function(st), "resolve_anonymous_function called without function-token"
     fn = st.take()
     args = resolve_arg_list(st)
     rp = st.take()
@@ -667,6 +666,12 @@ def resolve_indexed_assign(st, index):
 
 
 def resolve_token(st, outer_scope=True, func=None):
+    """Handle tokens in a "body".
+
+    Consumes one or more tokens from st and updates its
+    environments/scopes.
+
+    """
     comment = None
     if peek_comment(st):
         comment = resolve_comment(st)
