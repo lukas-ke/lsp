@@ -185,6 +185,24 @@ def test_call(print_env):
     check_for_file(print_env, "test/testdata/call.lua", check)
 
 
+def test_qualified_call(print_env):
+
+    def check_outer(ranged_scope):
+        r, scope = ranged_scope
+
+        # TODO: Why isn't the value known for this simple case?
+        assert is_Number(scope, "x", value=None)
+
+    def check(scopes, g_env):
+        assert len(scopes) == 3
+        check_outer(get_scope("outer", scopes))
+
+        # TODO: Why isn't the value known for this simple case?
+        assert is_Number(g_env, "y", value=None)
+
+    check_for_file(print_env, "test/testdata/qualified_call.lua", check)
+
+
 def test_table(print_env):
 
     def check_global(g_env):
@@ -259,6 +277,7 @@ def test_build_lua_doc(print_env):
     test_local_assign(print_env)
     test_scope(print_env)
     test_call(print_env)
+    test_qualified_call(print_env)
     test_table(print_env)
     test_some_globals(print_env)
     test_comment(print_env)

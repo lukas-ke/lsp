@@ -700,6 +700,11 @@ def resolve_token(st, outer_scope=True, func=None):
                     st.take()
                     resolve_indexed_assign(st, index_list)
                     return
+                elif peek_lparen(st):
+                    resolve_call(st, index_list)
+                    return
+                else:
+                    pass  #  TODO
 
             if st.done():
                 raise LuaError("Unexpected EOF")
