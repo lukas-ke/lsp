@@ -2,6 +2,9 @@
 #+STARTUP: indent
 #+TODO: TODO(t) STARTED(s) | DONE(d) SKIP(s)
 
+Note: This file renders terribly on github. View the raw file instead
+(or use org-mode in Emacs).
+
 * Resources
 ** https://microsoft.github.io/language-server-protocol/
 *** [[https://microsoft.github.io/language-server-protocol/specifications/specification-current/][specification-current]]
@@ -86,6 +89,7 @@ for
 Aditya.audre.|
 x = mega.more_functions.f3()
 #+end_src
+*** TODO Remove luaparser dependency from fragment.py
 ** LSP
 *** DONE JSON-RPC message parsing
 **** DONE Header parsing
