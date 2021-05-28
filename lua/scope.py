@@ -444,7 +444,8 @@ def get_object(st, obj):
         return obj
     elif isinstance(obj, list):
         # Assume index list
-        assert len(obj) != 0
+        if len(obj) == 0:
+            return None  # TODO: Happens e.g. for "trailing-period-assign.lua"
         t = st.get_object(obj[0])
         for key in obj[1:]:
             t = t.get(key)
