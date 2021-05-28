@@ -90,6 +90,7 @@ Aditya.audre.|
 x = mega.more_functions.f3()
 #+end_src
 *** TODO Remove luaparser dependency from fragment.py
+*** TODO Only complete for lua-files within require("|..)
 ** LSP
 *** DONE JSON-RPC message parsing
 **** DONE Header parsing

@@ -19,4 +19,4 @@ local function f3()
   }
 end
 
-some_global = f3(1,)
+some_global = f3(1)
