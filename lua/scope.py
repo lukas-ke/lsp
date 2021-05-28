@@ -746,10 +746,6 @@ def resolve_token(st, outer_scope=True, func=None):
         raise(LuaError(f"Unhandled token: {token_str(t2)}"))
 
 
-def no_log(*args):
-    pass
-
-
 def find_scopes(tokens, g_env, file_path):
     assert isinstance(g_env, GlobalEnv)
     st = State(tokens, g_env, file_path)
