@@ -74,8 +74,10 @@ def path_to_uri(path):
 def uri_to_path(uri):
     parsed = urlparse(uri)
     host = "{0}{0}{mnt}{0}".format(os.path.sep, mnt=parsed.netloc)
-    return Path(os.path.normpath(
-        os.path.join(host, url2pathname(parsed.path))))
+    p = os.path.normpath(os.path.join(host, url2pathname(parsed.path)))
+    if p.startswith("\\"):
+        p = p[1:]
+    return Path(p)
 
 
 class Location:

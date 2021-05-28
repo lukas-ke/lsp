@@ -138,6 +138,7 @@ def simple_paths_hack(lua_path):
 
 
 def complete_require(uri, prefix_full, lua_path):
+    """Completion within a require()-call"""
     prefix = lua_re.match_require(prefix_full).group(2)
     current_file = uri_to_path(uri)
 
@@ -232,7 +233,7 @@ class LuaDB(db.DB):
         prefix = doc.lines[position.line][:position.character]
 
         if lua_re.in_require(prefix):
-            self.log.info(f"in require: {prefix}")
+            self.log.info(f"in require: {prefix}, uri={doc.uri}")
             return complete_require(doc.uri, prefix, self.lua_path)
         else:
             self.log.info(f"not in require: {prefix}")
