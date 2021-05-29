@@ -7,6 +7,11 @@ from lsp.util import (send_message,
                       make_exit_notification,
                       make_initialized_notification)
 from lsp.parser import Parser
+from lsp_server.lsp_io_server import get_top_dir
+from lsp.log import file_logger
+
+def get_client_log_path():
+    return get_top_dir() / "client.log"
 
 
 def launch_server():
@@ -17,7 +22,7 @@ def launch_server():
         stdin=subprocess.PIPE)
 
 
-def test_lsp_server(log_f):
+def test_lsp_server(log):
 
     with launch_server() as lsp_server:
         def write(msg):
@@ -27,46 +32,43 @@ def test_lsp_server(log_f):
         def read():
             lsp_server.stdout.read()
 
-        response_parser = Parser(log_f)
+        response_parser = Parser(log)
 
-        log_f("Make initialize request..")
+        log.info("Make initialize request..")
         send_message(write, make_initialize_request(
             msg_id=1,
             client_name="lsp_io_client",
             client_version="1.0",
             processId=os.getpid()))
-        log_f("Read initialize response..")
+        log.info("Read initialize response..")
         reply = response_parser.read_response(lsp_server.stdout)
         log_f(str(reply))
 
         send_message(write, make_initialized_notification())
 
-        log_f("Make shutdown request..")
+        log.info("Make shutdown request..")
         send_message(write, make_shutdown_request(msg_id=2))
-        log_f("Read shutdown response..")
+        log.info("Read shutdown response..")
         reply = response_parser.read_response(lsp_server.stdout)
-        log_f(str(reply))
+        log.info(str(reply))
 
-        log_f("Make exit request..")
+        log.info("Make exit request..")
         send_message(write, make_exit_notification())
 
-        log_f("Waiting for server to exit..")
+        log.info("Waiting for server to exit..")
         try:
             exit_code = lsp_server.wait(timeout=1.0)
         except subprocess.TimeoutExpired:
-            log_f("Server didn't shut down in time. Shutting down client.")
+            log.info("Server didn't shut down in time. Shutting down client.")
         else:
-            log_f(f"lsp-server shut down with exit code {exit_code}")
+            log.info(f"lsp-server shut down with exit code {exit_code}")
 
 
 def run():
-    with open("client.log", "w") as client_log:
-        def log_f(msg):
-            client_log.write(f"{msg}\n")
-            client_log.flush()
-
-        log_f("--------------------")
-        test_lsp_server(log_f)
+    log_path = get_client_log_path()
+    with file_logger(log_path, 2) as log:
+        log.info("--------------------")
+        test_lsp_server(log)
 
 
 if __name__ == '__main__':

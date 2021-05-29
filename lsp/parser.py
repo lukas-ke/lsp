@@ -6,16 +6,12 @@ from . util import parse_header, header_end
 
 class Parser:
     """Parses LSP header and content."""
-    def __init__(self, log_f):
+    def __init__(self, log):
         self.content = []
-        self.log_f = log_f
-        self._log("Created")
-
-    def _log(self, msg):
-        self.log_f(f"[Parser] {msg}")
+        self.log = log.prefixed("[Parser]")
 
     def _quit(self, msg):
-        self._log(f"Quitting: {msg}")
+        self.log.info(f"Quitting: {msg}")
         exit(1)
 
     def _read_header(self, stream):
@@ -29,21 +25,20 @@ class Parser:
             content.append(data)
             if data == b"\n":
                 if content[-4:] == header_end:
-                    return parse_header(b"".join(content[:-2]), self._log)
+                    return parse_header(b"".join(content[:-2]), self.log)
 
     def _read_content(self, length):
         raw_content = sys.stdin.buffer.read(length)
-        # self._log("Raw content: " + raw_content.decode("utf-8"))
         return json.loads(raw_content.decode("utf-8"))
 
     def read(self):
         header = self._read_header(sys.stdin.buffer)
-        self._log(f"Header: {str(header)}")
+        self.log.info(f"Header: {str(header)}")
         length = int(header[b"Content-Length"])
-        self._log(f"Length: {length}")
+        self.log.info(f"Length: {length}")
         content = self._read_content(length)
         assert(type(content) == dict)
-        self._log(str(content))
+        self.log.info(str(content))
         return content
 
     def read_response(self, stream):

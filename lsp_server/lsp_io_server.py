@@ -1,9 +1,19 @@
 import sys
 import json
-from lsp.parser import Parser
-from lsp_server.lsp_state import LSP_state
-from lsp.util import send_message
+from pathlib import Path
+
 from lsp.db import DB
+from lsp.log import file_logger
+from lsp.parser import Parser
+from lsp.util import send_message
+from lsp_server.lsp_state import LSP_state
+
+def get_top_dir():
+    return Path(__file__).parent.parent.absolute()
+
+
+def get_server_log_path():
+    return get_top_dir() / "server.log"
 
 
 def run(db, log):
@@ -12,21 +22,18 @@ def run(db, log):
         sys.stdout.buffer.write(message)  # TODO: Why did I encode it? :)
         sys.stdout.flush()
 
-    def log_f(msg):
-        log.info(msg)
-
-    log_f("--------------------")
+    log.info("--------------------")
     lsp_state = LSP_state(db, log)
-    p = Parser(log_f)
+    p = Parser(log)
 
     while True:
-        log_f("Read message..")
+        log.info("Read message..")
         content = p.read()
         response = lsp_state.method(content)
         if response is not None:
             send_message(write, json.dumps(response))
         if lsp_state.exit:
-            log_f("State has received exit notification. Exiting.")
+            log.info("State has received exit notification. Exiting.")
             break
 
     if lsp_state.shutdown and lsp_state.exit:
@@ -36,6 +43,7 @@ def run(db, log):
 
 
 if __name__ == '__main__':
-    with open("server.log", 'w') as log_file:
+    log_path = get_server_log_path()
+    with file_logger(log_path, 2) as log:
         exit_code = run(DB())
         exit(exit_code)
