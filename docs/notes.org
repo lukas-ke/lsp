@@ -37,6 +37,7 @@ reparsing.
 
 * Tasks
 ** Lua
+*** DONE Remove luaparser dependency from fragment.py
 *** TODO Support operators
 Add support for expressions like
 #+begin_src lua
@@ -89,7 +90,6 @@ for
 Aditya.audre.|
 x = mega.more_functions.f3()
 #+end_src
-*** TODO Remove luaparser dependency from fragment.py
 *** TODO Only complete for lua-files within require("|..)
 ** LSP
 *** DONE JSON-RPC message parsing
