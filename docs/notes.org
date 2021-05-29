@@ -58,7 +58,7 @@ should yield
 : abc.def
 not
 : abc.def.ghi
-*** TODO Fix crash
+*** DONE Fix crash
 #+begin_example
 Process luk-server stderr finished
 Traceback (most recent call last):

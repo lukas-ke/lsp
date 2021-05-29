@@ -650,7 +650,7 @@ def indexed_assign(st, index_list, value):
 
 
 def resolve_indexed_assign(st, index):
-    # TODO: Fuse with global_assign, pass a lhs that can contain indexes
+    # TODO: Fuse with global_assign, pass an lhs that can contain indexes
     # Differentiate between Name and Index. Maybe call it a reference or path or smth
     # unless there's some obvious downside and I should do a recursive index structure.
 
@@ -660,6 +660,11 @@ def resolve_indexed_assign(st, index):
 
     rhs = rhs_list[0]
     target = get_object(st, index[:-1])
+
+    if not isinstance(target, Table):
+        # Only tables supports assignment
+        return
+
     name = index[-1]
     value = get_object(st, rhs)
     target[name] = value
