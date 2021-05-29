@@ -354,7 +354,7 @@ class LuaDB(db.DB):
         for part in parts[1:]:
             obj = obj.get(part)
             if obj is None:
-                return label_only
+                return label_only()
 
         return Hover(obj.pretty_str(indent=0), Range(
             Position(line=start_line, character=start_char),
