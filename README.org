@@ -52,5 +52,5 @@ Run lsp_io_client.py like this:
 : python -m clients.lsp_io_client
 * Running tests
   Run
-  : python -m test.test_all
+  : python -m test.all
   (from the repository root folder)
