@@ -1,4 +1,3 @@
-
 my_table = {
   x = 42,
   xavier="Professor",

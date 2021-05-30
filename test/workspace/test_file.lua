@@ -1,5 +1,3 @@
-
-
 local function test_local()
  local x = 3
  if true then
