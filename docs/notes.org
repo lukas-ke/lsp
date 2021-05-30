@@ -15,7 +15,9 @@ familiar with VS Code Extension API."
 ** [[https://en.wikipedia.org/wiki/Language_Server_Protocol][Wikipedia: Language Server Protocol]]
 
 * Ideas
-Misc ideas that are less obvious than the tasks below, may turn out to be bad or difficult.
+Misc ideas that are less obvious than the tasks below, may turn out to
+be bad or difficult.
+
 ** Indicate when a variable is captured in inner function scopes on hover
 ** Allow documenting table-like keyword arguments
 Syntax idea:
@@ -36,7 +38,7 @@ However this is probably extremely complicated compared to just
 reparsing.
 
 * Tasks
-** Lua
+** Lua [3/7]
 *** DONE Remove luaparser dependency from fragment.py
 *** TODO Support operators
 Add support for expressions like
@@ -49,7 +51,7 @@ Retain types based on input and operator.
 *** TODO Make function arguments available in function scope
 Function arguments should be available in the scope for a function
 *** TODO Remove deleted globals from g_env
-*** TODO Fix indexed parsing
+*** DONE Fix indexed parsing
 Find all segments *up to the one* the cursor is at, not always up to the
 final segment, e.g.
 
@@ -91,10 +93,11 @@ Aditya.audre.|
 x = mega.more_functions.f3()
 #+end_src
 *** TODO Only complete for lua-files within require("|..)
-** LSP
+** LSP [12/40]
 *** DONE JSON-RPC message parsing
 **** DONE Header parsing
 **** DONE Content parsing
+*** TODO Parse documents that aren't opened by client
 *** STARTED Initialize Request
 **** DONE Handle Initialize Request
 **** TODO Report errors on incorrect client behavior
@@ -143,8 +146,28 @@ Skip for now, new in 3.16.0
 **** TODO textDocument/willSaveWaitUntil
 **** TODO textDocument/didSave
 **** STARTED textDocument/didClose
-*** TODO Diagnostics
-**** ...
+*** STARTED Diagnostics
+Diagnostics are currently sent after didChange.
+
+This is especially useful while working on the parsing,
+as it lets me see directly where it stopped.
+
+**** TODO Respect PublishDiagnosticsClientCapabilities
+TextDocumentClientCapabilities.publishDiagnostics
+**** STARTED ~Diagnostic~-interface
+***** STARTED range
+Remaining: Actual range, not just a position
+***** TODO severity field
+***** TODO code field
+***** SKIP codeDescription field
+Pretty new (3.16), skip for now
+***** TODO source field
+***** DONE message field
+***** SKIP tags field
+Since 3.15, skip for now
+***** TODO relatedInformation field
+***** SKIP data field
+Used for codeActions, skip for nowd
 *** STARTED Completion
 **** STARTED textDocument/completion
 **** TODO Snippets, tab-stops etc
@@ -177,7 +200,7 @@ Added in 3.16, skip for now.
 Added in 3.16, skip for now
 *** SKIP Monikers
 Added in 3.16, skip for now.
-** Implementation considerations
+** Implementation considerations [1/3]
 *** TODO Command line
 "Servers usually support different communication channels (e.g. stdio,
 pipes, …). To easy the usage of servers in different clients it is
@@ -186,14 +209,14 @@ command line arguments to pick the communication channel:
 stdio, +pipe+, socket, +node-ipc+"
 *** DONE support stdio
 *** TODO support sockets
-** Misc
+** Misc [0/2]
 *** TODO Threaded parsing
 Run parsing and updates in a separate thread from the I/O so the I/O
 can always respond.
 Make the updates and completion requests cancellable.
 *** TODO Use lsp_defs classes for everything
 Align them more closely with the LSP interfaces
-** Clients
+** Clients [0/3]
 *** STARTED emacs client
 **** TODO Workspace handling
 **** TODO lua-mode hook

@@ -4,6 +4,7 @@ from lsp.lsp_defs import (
     DefinitionParams,
     DidCloseTextDocumentParams,
     InitializeResult,
+    NotificationMessage,
     Position,
     SignatureHelpParams,
     TextDocumentContentChangeEvent,
@@ -21,7 +22,6 @@ class LSP_state:
         self.shutdown = False
         self.exit = False
         self.db = db
-
         self.didOpen = {}
 
     def method(self, content):
@@ -199,7 +199,11 @@ class LSP_state:
         doc = Document(uri, text, self.log)
         self.didOpen[uri] = doc
         self.db.didOpen(doc)
-        return None
+
+        # TODO: Only if client has
+        # PublishDiagnosticsClientCapabilities
+        msg_diag = self._get_diagnostics_notification(doc)
+        return msg_diag.toDict()
 
     def _textDocument_didClose(self, content):
         p = DidCloseTextDocumentParams.fromDict(content["params"])
@@ -229,6 +233,11 @@ class LSP_state:
         doc.contentChanges(changes, version)
         self.db.didChange(doc)
 
+        # TODO: Only if client has
+        # PublishDiagnosticsClientCapabilities
+        msg_diag = self._get_diagnostics_notification(doc)
+        return msg_diag.toDict()
+
     def _textDocument_signatureHelp(self, content):
         p = SignatureHelpParams.fromDict(content["params"])
         doc = self.didOpen[p.textDocument.uri]
@@ -242,3 +251,11 @@ class LSP_state:
 
     def _textDocument_documentLink(self, content):
         return make_response(content["id"], [])
+
+    def _get_diagnostics_notification(self, doc) -> NotificationMessage:
+        # TODO: Only if client has
+        # PublishDiagnosticsClientCapabilities
+        diagnostics = self.db.get_PublishDiagnosticsParams(doc)
+        return NotificationMessage(
+            "textDocument/publishDiagnostics",
+            diagnostics)

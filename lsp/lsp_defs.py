@@ -81,6 +81,36 @@ def uri_to_path(uri):
     return Path(p)
 
 
+class Diagnostic:
+    def __init__(
+            self,
+            range,
+            # severity,
+            # code,
+            # codeDescription,
+            # source,
+            message,
+            # tags,
+            # relatedInformation,
+            # data
+    ):
+        self.range = range
+        # self.severity = severity
+        # self.code = code
+        # self.codeDescription = codeDescription
+        # self.source = source
+        self.message = message
+        # self.tags = tags
+        # self.relatedInformation = relatedInformation
+        # self.data = data
+
+    def toDict(self):
+        return {
+            "range": self.range.toDict(),
+            "message": self.message
+        }
+
+
 class Location:
     """"Represents a location inside a resource, such as a line inside a
     text file.
@@ -94,6 +124,34 @@ class Location:
         return {
             "uri": self.uri,
             "range": self.range.toDict()}
+
+
+class Message:
+    def __init__(self):
+        self.jsonrpc = "2.0"
+
+    def toDict(self):
+        return {"jsonrpc": self.jsonrpc}
+
+
+class NotificationMessage(Message):
+    def __init__(self, method, params):
+        super().__init__()
+        self.method = method
+        self.params = params
+
+    def toDict(self):
+        d = super().toDict()
+
+        if isinstance(self.params, list):
+            params = make_dicts(self.params)
+        else:
+            params = self.params.toDict()
+
+        d.update({
+            "method": self.method,
+            "params": params})
+        return d
 
 
 # Defines how the host (editor) should sync document changes to the language
@@ -126,6 +184,18 @@ class Position:
 
     def toDict(self):
         return {"line": self.line, "character": self.character}
+
+
+class PublishDiagnosticsParams:
+    def __init__(self, uri, version, diagnostics):
+        self.uri = uri
+        self.version = version
+        self.diagnostics = diagnostics
+
+    def toDict(self):
+        return {"uri": self.uri,
+                "version": self.version,
+                "diagnostics": make_dicts(self.diagnostics)}
 
 
 class Range:

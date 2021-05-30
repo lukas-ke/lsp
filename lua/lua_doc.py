@@ -15,9 +15,13 @@ class LuaDoc:
         }
     """
 
-    def __init__(self, scopes):
+    def __init__(self, scopes, errors=None):
         assert isinstance(scopes, list)
         self.scopes = scopes
+        if errors is None:
+            self.errors = []
+        else:
+            self.errors = errors
 
     def scope_at(self, pos):
         narrowest_matching = None

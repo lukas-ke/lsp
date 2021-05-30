@@ -16,6 +16,7 @@ from lsp.lsp_defs import (
     Location,
     ParameterInformation,
     Position,
+    PublishDiagnosticsParams,
     Range,
     SignatureHelp,
     SignatureInformation,
@@ -25,6 +26,7 @@ import lsp.lsp_defs as lsp_defs
 from . import lua_re
 from pathlib import Path
 from typing import Mapping
+import lua.error
 
 LUA_TYPE_TO_LSP_KIND = {
     lua_types.Number: CompletionItemKind.Value,
@@ -373,3 +375,16 @@ class LuaDB(db.DB):
         lua_doc = read_lua(text, self.g_env, doc.uri)
         self.log.info(f"re-read LuaDoc with {len(lua_doc.scopes)} scopes")
         self.lua_docs[doc.uri] = lua_doc
+
+    def get_PublishDiagnosticsParams(self, doc):
+        lua_doc = self.lua_docs.get(doc.uri)
+        if lua_doc is None:
+            return []
+
+        errors = lua_doc.errors
+        lua_doc = self.lua_docs[doc.uri]
+        diagnostics = [lua.error.to_diagnostic(e) for e in errors]
+        return PublishDiagnosticsParams(
+            uri=doc.uri,
+            version=doc.version,
+            diagnostics=diagnostics)
