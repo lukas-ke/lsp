@@ -92,36 +92,84 @@ def within(ch, intervals):
     return False
 
 
-def find_indexing_at(log, get_line_f, line_num, char_num):
-    """Return indexing, (start_line, start_char), (end_line, end_char)
-    for the indexing expression surrounding (line_num, char_num),
-    e.g.
-    > "some.lua.qualified.name", (3, 7), (3, 23)
-    or None if not at indexing tokens.
-
-    - TODO: What should I call that? Qualified name? Indexing? Discern
-    eh["abc"] vs eh.abc, or just consider that syntactic sugar? One
-    can be resolved by expressions and might get a bit complicated.
+def _find_indexing_start(line: str, char_num: int):
+    """Return the position of the first indexing-symbol preceding char_num
 
     """
-    line = get_line_f(line_num)
-    log.info(f"Hover for {line}")
     start = None
     for i in range(char_num, -1, -1):
         if line[i] in NAME_SYMBOLS or line[i] in INDEXING_SYMBOLS:
             start = i
         else:
             break
+    return start
 
+
+def _find_indexing_end(line: str, char_num: int):
+    """Return the position of the last indexing-symbol following char_num
+
+    """
+    end = None
+    for i in range(char_num, len(line)):
+        if line[i] in NAME_SYMBOLS or line[i] in INDEXING_SYMBOLS:
+            end = i + 1
+        else:
+            break
+    return end
+
+
+def _find_word_end(line: str, char_num: int):
+    """Return the position of the last name symbol following char_num
+
+    """
+    if line[char_num] == '.':
+        # When char_num is at a ".", use its index as the end,
+        # so that "abc.def|." results in "abc.def"
+        # (This kind of makes sense, because insertion at this position
+        # would insert text before the ".").
+        return char_num
+
+    end = None
+    for i in range(char_num, len(line)):
+        if line[i] in NAME_SYMBOLS:
+            end = i + 1
+        else:
+            break
+    return end
+
+
+def find_indexing_at(get_line_f, line_num, char_num):
+    """Return indexing string and range surrounding the position.
+
+    Returns the matched candidate string and its extents
+    (start_line, start_char), (end_line, end_char), or None
+    if not and indexing tokens.
+
+    Might, for example, return:
+    > "some.lua.qualified.name", (3, 7), (3, 23)
+
+
+    Includes all index-segments up to the one the position is inside,
+    e.g. for "abc.d|ef.ghi" it will return the range that contains
+    "abc.def".
+
+    - TODO: What should I call that? Qualified name? Indexing? Discern
+    eh["abc"] vs eh.abc, or just consider that syntactic sugar? One
+    can be resolved by expressions and might get a bit complicated.
+
+    """
+
+    # TODO: This should probably search across multiple lines, and
+    # allow whitespace around "."
+    line = get_line_f(line_num)
+
+    # Search from the first word of the name or index list
+    start = _find_indexing_start(line, char_num)
     if start is None:
         return None
 
-    end = len(line)
-    for i in range(char_num, len(line)):
-        if line[i] not in NAME_SYMBOLS and line[i] not in INDEXING_SYMBOLS:
-            end = i
-            break
-
+    # ... to the end of the current word
+    end = _find_word_end(line, char_num)
     candidate = line[start:end]
     if candidate[0] not in INITIAL_NAME_SYMBOL:
         return None

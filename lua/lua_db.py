@@ -325,7 +325,6 @@ class LuaDB(db.DB):
     def hover(self, doc, hoverParams):
         try:
             index_info = find_indexing_at(
-                self.log,
                 doc.line_n,
                 hoverParams.position.line,
                 hoverParams.position.character)

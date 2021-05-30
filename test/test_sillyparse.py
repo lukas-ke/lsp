@@ -114,11 +114,31 @@ def test_find_indexing_before(print_env):
     assert f(["abc", " a.bc", "|"]) == (1, (1, 5))
 
 
+def test_find_indexing_at(print_env):
+    def f(lines):
+        str_lines = "\n".join(lines)
+        line_num, char_num = _find_caret_pos(lines)
+
+        def get_line(n):
+            return lines[n]
+
+        result = sp.find_indexing_at(get_line, line_num, char_num)
+        if print_env:
+            print(f'find_indexing_at "{str_lines}" -> {result}')
+        return result
+
+    assert f(["ab|c"]) == ("abc", (0, 0), (0, 3))
+    assert f(["|abc.def|.ghi"]) == ("abc", (0, 0), (0, 3))
+    assert f(["abc.def|.ghi"]) == ("abc.def", (0, 0), (0, 7))
+    assert (f(["abc.def.ghi| "])) is None
+
+
 def run(print_env):
     test_find_string_intervals(print_env)
     test_find_arglist_start_single_line(print_env)
     test_find_arglist_start_multi_line(print_env)
     test_find_indexing_before(print_env)
+    test_find_indexing_at(print_env)
 
 
 if __name__ == '__main__':
