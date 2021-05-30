@@ -790,17 +790,18 @@ def resolve_token(st, outer_scope=True, func=None):
         raise(LuaError(f"Unhandled token: {token_str(t2)}"))
 
 
-def find_scopes(tokens, g_env, file_path):
+def find_scopes_plus_errors(tokens, g_env, file_path):
     assert isinstance(g_env, GlobalEnv)
     st = State(tokens, g_env, file_path)
 
+    errors = []
     try:
         while st.n < len(tokens):
             resolve_token(st)
-    except LuaError:
-        pass
-    except TODOError:
-        pass
+    except LuaError as e:
+        errors.append(e)
+    except TODOError as e:
+        errors.append(e)
 
     # Pop file scope
     prev = st.prev()
@@ -808,4 +809,9 @@ def find_scopes(tokens, g_env, file_path):
     epicycle = 1
     st.pop_scope(last_token_line + epicycle)
 
-    return st.scopes
+    return st.scopes, errors
+
+
+def find_scopes(*args):
+    scopes, errors = find_scopes_plus_errors(*args)
+    return scopes
