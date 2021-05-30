@@ -82,7 +82,10 @@ token_specification = [
     ('STR', r'".*?"'),
     ('MISMATCH', r'.')]
 
-TOKEN = re.compile('|'.join(f'(?P<{p[0]}>{p[1]})' for p in token_specification), flags=re.DOTALL|re.MULTILINE)
+TOKEN = re.compile(
+    '|'.join(f'(?P<{p[0]}>{p[1]})'
+             for p in token_specification),
+    flags=re.DOTALL|re.MULTILINE)
 
 COMMENT_PREFIX = re.compile("^(--*)", flags=re.DOTALL|re.MULTILINE)
 

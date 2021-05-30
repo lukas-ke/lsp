@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from . import annotations
-import itertools
+
 
 def _space_sep_non_empty(*args):
     filtered = [a for a in args if a is not None and len(a) > 0]
@@ -47,7 +47,8 @@ class Comment:
         if len(arg_docs) == 0:
             return ""
 
-        parameter_notes = "\n".join([f"  {name}: {docs}" for name, docs in arg_docs])
+        parameter_notes = "\n".join([f"  {name}: {docs}"
+                                     for name, docs in arg_docs])
         return f"\n\n**Parameter notes**:\n{parameter_notes}"
 
 
@@ -62,7 +63,7 @@ class Uninitialized(LuaItem):
 
 class Arg:
     """Function argument"""
-    def __init__(self, name, lua_type=None, doc=None, line_num=None, char_num=None):
+    def __init__(self, name, lua_type=None, doc=None, line_num=None, char_num=None):  # noqa: E501
         self.name = name
         self.lua_type = lua_type
         self.doc = doc
@@ -85,6 +86,7 @@ def _lua_str_to_python_bool(lua_str):
     else:
         assert False, "FILE_NOT_FOUND"
 
+
 def _python_bool_to_lua_str(python_bool):
     if python_bool:
         return "true"
@@ -95,12 +97,12 @@ def _python_bool_to_lua_str(python_bool):
 class Boolean(LuaItem):
     def __init__(self, value, doc, line_num, char_num):
         if not isinstance(value, bool):
-            self.value=_lua_str_to_python_bool(value)
+            self.value = _lua_str_to_python_bool(value)
         else:
             self.value = value
-        self.doc=doc
-        self.line_num=line_num
-        self.char_num=char_num
+        self.doc = doc
+        self.line_num = line_num
+        self.char_num = char_num
 
     def pretty_str(self, indent):
         s = _python_bool_to_lua_str(self.value)
@@ -110,6 +112,7 @@ class Boolean(LuaItem):
 def _assign_types_to_args(args, comment: Comment):
     assert comment is not None
     assert isinstance(comment, Comment)
+
     def find_arg(name):
         for arg in args:
             if arg.name == name:
@@ -136,7 +139,7 @@ def _returns_from_annotations(comment: Comment):
 
 
 class Function(LuaItem):
-    def __init__(self, name=None, names=None, args=None, doc=None, file_path=None, line_num=None, char_num=None):
+    def __init__(self, name=None, names=None, args=None, doc=None, file_path=None, line_num=None, char_num=None):  # noqa: E501
         LuaItem.__init__(self, file_path)
         self.name = name
         self.args = args
@@ -144,7 +147,10 @@ class Function(LuaItem):
         assert self.doc is None or isinstance(self.doc, Comment)
         self.line_num = line_num
         self.char_num = char_num
-        self.names=names  # TODO: Hack, use some index/name type that forces figuring out which
+
+        # TODO: Hack, use some index/name type that forces figuring out which
+        self.names = names
+
         if self.doc is not None:
             _assign_types_to_args(self.args, self.doc)
 
@@ -258,10 +264,8 @@ class Number(LuaItem):
         self.line_num = line_num
         self.char_num = char_num
 
-
     def __str__(self):
         return self.pretty_str(0)
-
 
     def pretty_str(self, indent):
         if self.value is None:
@@ -299,11 +303,11 @@ class Table(LuaItem):
     def pretty_str(self, indent):
         ind = " " * indent
         ind2 = " " * (indent + 1)
-        return ("{" +
-                "".join(
+        return ("{"
+                + "".join(
                     [f"\n{ind2}{key}={self.fields[key].pretty_str(indent + 1)}"
-                     for key in self.fields]) +
-                f"\n{ind}}}")
+                     for key in self.fields])
+                + f"\n{ind}}}")
 
     def pretty_print(self, indent=0):
         print(self.pretty_str(indent))
@@ -353,11 +357,12 @@ class GlobalEnv:
             title = f'{ind}Global env {{'
         else:
             title = ""
-        return (title +
-                "".join([
-                    f"\n{ind2}{key}={self.names[key].pretty_str(indent + 1)}"
-                    for key in self.names if key != "_G"]) +
-                f"\n{ind}}}")
+        return (
+            title
+            + "".join([
+                f"\n{ind2}{key}={self.names[key].pretty_str(indent + 1)}"
+                for key in self.names if key != "_G"])
+            + f"\n{ind}}}")
 
     def pretty_print(self, indent=0, heading=True):
         print(self.pretty_str(indent, heading))
@@ -462,12 +467,13 @@ class LocalEnv:
                 return f'\n{ind2}(+ scope "{self.parent.scopeName}")'
             return ""
 
-        return (title +
-                "".join(
-                    [f"\n{ind2}{key}={_pretty_str(self.names[key], indent + 1)}"
-                     for key in self.names]) +
-                f"{maybe_parent()}" +
-                f"\n{ind}}}")
+        return (
+            title
+            + "".join(
+                [f"\n{ind2}{key}={_pretty_str(self.names[key], indent + 1)}"
+                 for key in self.names])
+            + f"{maybe_parent()}"
+            + f"\n{ind}}}")
 
     def pretty_print(self, indent=0, heading=True):
         print(self.pretty_str(indent, heading))
@@ -508,8 +514,7 @@ class EmptyEnv:
         return None
 
     def print_env(self):
-        names = "\n".join([" " + n for n in self.names])
-        print(f'EmptyEnv')
+        print('EmptyEnv')
 
     def pretty_str(self, indent):
         return "EmptyEnv"

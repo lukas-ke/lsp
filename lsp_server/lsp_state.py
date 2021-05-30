@@ -2,11 +2,9 @@ from lsp.util import make_response
 from lsp.lsp_defs import (
     CompletionParams,
     DefinitionParams,
-    DocumentLink,
     DidCloseTextDocumentParams,
     InitializeResult,
     Position,
-    Range,
     SignatureHelpParams,
     TextDocumentContentChangeEvent,
     TextDocumentIdentifier,

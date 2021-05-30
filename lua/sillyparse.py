@@ -1,5 +1,6 @@
 DEBUG = False
 
+
 def dbg(msg):
     if DEBUG:
         print(msg)
@@ -36,6 +37,7 @@ NAME_SYMBOLS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"
 INITIAL_NAME_SYMBOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"
 INDEXING_SYMBOLS = ".:"
 
+
 def opener_for(ch):
     if ch == ")":
         return "("
@@ -44,6 +46,7 @@ def opener_for(ch):
     elif ch == "}":
         return "{"
 
+
 def closer_for(ch):
     if ch == "(":
         return ")"
@@ -51,6 +54,7 @@ def closer_for(ch):
         return "]"
     elif ch == "{":
         return "}"
+
 
 def find_string_intervals(line):
     intervals = []
@@ -169,22 +173,24 @@ def find_arglist_start(get_line_f, line_num, char_num):
     """Find the start of the innermost Lua argument list that contains
     line_num, char_num.
 
-    Does not include the parenthesis, since those are optional in some cases in Lua, e.g. for
+    Does not include the parenthesis, since those are optional in some
+    cases in Lua, e.g. for
+
     func "1" or
     func [2] or
     func {}
 
-    e.g. for > "func(x,|y), finds the x-index
+    e.g. for `func(x,|y)´, finds the x-index,
+    and for `f1(1, f2(bah|))´ find the index of the b in bah.
 
-    And for f1(1, f2(bah|)) find the index of the b in bah
-
-    Considers only the opening-end of the argument list, i.e. it can be
-    incomplete and unclosed.
+    Considers only the opening-end of the argument list, i.e. it can
+    be incomplete and unclosed.
 
     TODO: Decide corner cases like
     --B--       --A--
     ....., func(
                ^- Should that position count for A or B list?
+
     """
     dbg("--find_arglist_start--")
 
@@ -214,10 +220,9 @@ def find_arglist_start(get_line_f, line_num, char_num):
                 dbg(f"Ignoring {ch} at {n}")
                 continue
 
-
             if ch in CLOSERS:
                 if ch == ")" and st.candidate is not None:
-                    dbg(f"Stacked parenthesis )[snip]( at {n}, use candidate {st.candidate}")
+                    dbg(f"Stacked parenthesis )[snip]( at {n}, use candidate {st.candidate}")  # noqa: E501
                     return st.candidate_line, st.candidate,
 
                 dbg(f"push: {ch} at {n}")
@@ -244,7 +249,7 @@ def find_arglist_start(get_line_f, line_num, char_num):
                     continue
                 elif st.candidate is not None:
                     if ch in NAME_SYMBOLS:
-                        dbg(f"Name at {n}, return previous candidate at {st.candidate}")
+                        dbg(f"Name at {n}, return previous candidate at {st.candidate}")  # noqa: E501
                         return st.candidate_line, st.candidate
 
                     if ch == ",":

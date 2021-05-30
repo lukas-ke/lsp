@@ -5,7 +5,7 @@ import re
 __all__ = [
     'parse_comment',
     'strip_annotations',
-    'strip_prefix'  # Maybe
+    'strip_prefix',  # Maybe
     'Param',
     'Return',
 ]
@@ -29,7 +29,11 @@ def parse_comment(comment):
     for m in ANNOTATION.finditer(stripped_comment):
         kind = m.lastgroup
         if kind == "PARAM":
-            annotations.append(Param("param", m.group(3), m.group(4), m.group(5)))
+            annotations.append(Param(
+                "param",
+                m.group(3),
+                m.group(4),
+                m.group(5)))
         elif kind == "RETURN":
             annotations.append(Return("return", m.group(8)))
     return annotations
@@ -98,9 +102,12 @@ def param_re():
 def return_re():
     return f"@(return){an.sep}({an.lua_type})"
 
+
 annotations = [
     ("PARAM", param_re()),
     ("RETURN", return_re())]
 
 
-ANNOTATION = re.compile('|'.join(f'(?P<{p[0]}>{p[1]})' for p in annotations), flags=re.DOTALL|re.MULTILINE)
+ANNOTATION = re.compile(
+    '|'.join(f'(?P<{p[0]}>{p[1]})' for p in annotations),
+    flags=re.DOTALL|re.MULTILINE)

@@ -8,6 +8,7 @@ from lsp.parser import Parser
 from lsp.util import send_message
 from lsp_server.lsp_state import LSP_state
 
+
 def get_top_dir():
     return Path(__file__).parent.parent.absolute()
 

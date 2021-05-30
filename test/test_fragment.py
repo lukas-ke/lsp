@@ -1,5 +1,5 @@
 from lua import fragment
-from lua.lua_types import (GlobalEnv, LocalEnv)
+from lua.lua_types import GlobalEnv
 import lua.lua_types as lua_types
 from lua.build_lua_doc import read_lua
 from lsp.lsp_defs import Position

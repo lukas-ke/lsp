@@ -10,6 +10,7 @@ from lsp.parser import Parser
 from lsp_server.lsp_io_server import get_top_dir
 from lsp.log import file_logger
 
+
 def get_client_log_path():
     return get_top_dir() / "client.log"
 
@@ -42,7 +43,7 @@ def test_lsp_server(log):
             processId=os.getpid()))
         log.info("Read initialize response..")
         reply = response_parser.read_response(lsp_server.stdout)
-        log_f(str(reply))
+        log.info(str(reply))
 
         send_message(write, make_initialized_notification())
 

@@ -3,6 +3,7 @@ from lsp.log import NullLog
 # TODO: HORRID
 WORD_CHARS = "abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ0123456789_"
 
+
 def word_start(s, at):
     for n in range(at, -1, -1):
         if s[n] not in WORD_CHARS:

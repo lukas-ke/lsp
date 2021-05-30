@@ -8,13 +8,14 @@ def read_file(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         return f.read()
 
+
 def bench_tokenize(file_path):
     times = []
 
     text = read_file(file_path)
     for i in range(3):
         start = time()
-        tokens = tokenize(text)
+        tokens = tokenize(text)  # noqa: F841
         end = time()
         times.append(end - start)
 
@@ -30,7 +31,7 @@ def bench_build_lua_doc(file_path):
     text = read_file(file_path)
     for i in range(3):
         start = time()
-        doc = build_lua_doc.read_lua(text, g_env, file_path)
+        doc = build_lua_doc.read_lua(text, g_env, file_path)  # noqa: F841
         end = time()
         times.append(end - start)
 

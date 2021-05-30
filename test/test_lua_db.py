@@ -2,13 +2,12 @@ import lua.lua_db as lua_db
 from lua.lua_db import LuaDB
 from lua.lua_types import GlobalEnv
 from lsp.lsp_defs import CompletionItemKind, Position
-import io
 from pathlib import Path
 from lua import lua_types
-from lsp.lsp_defs import Position
 from lsp_server.doc import Document
 from lsp.log import stdout_logger
 from lua import build_lua_doc
+
 
 def get_workspace_dir():
     return Path(".").absolute()
@@ -69,7 +68,6 @@ def describe_prefix(doc, position):
 
 
 def check_completions(db, doc, pos, check_f, print_env):
-    textDocument = None
     items = db.completions(doc, pos)
     print_completions(print_env, describe_prefix(doc, pos), items)
     check_f(items)
@@ -109,7 +107,7 @@ def test_db_completions(print_env, log):
         assert has("my_value", CompletionItemKind.Value)
         assert has("global_value", CompletionItemKind.Value)
         assert has("a_function", CompletionItemKind.Function)
-        #assert len(items) == 4
+        assert len(items) == 4
     check("", checks_all)
 
     def checks_my(items):

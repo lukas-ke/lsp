@@ -14,7 +14,6 @@ from . lua_types import (
     Boolean
 )
 from . import lua_types as lt
-from . import annotations
 
 
 class LuaError(Exception):
@@ -41,8 +40,8 @@ class State:
         self.scopeStack.append((0, lt.LocalEnv(None, scopeName="outer")))
         self.g_env = g_env
         self.file_path = file_path
-        self.scopes = [] # (range, scope)
-        self.n = 0 # Token num
+        self.scopes = []  # (range, scope)
+        self.n = 0  # Token num
         self.tokens = tokens
         self.file_returns = []
 
@@ -68,7 +67,7 @@ class State:
 
     def prev(self):
         if self.n > 0:
-            return self.tokens[self.n -1]
+            return self.tokens[self.n - 1]
         return None
 
     def get(self):
@@ -114,14 +113,15 @@ class State:
 
 def resolve_field(st, comment=None):
     if not peek_assign(st):
-        raise LuaError(f"Invalid field? {name_token.value}")
+        raise LuaError("Invalid field?")
     st.take()
     return resolve_rhs(st, comment)
 
 
 def resolve_table(st):
     opening_brace = st.take()
-    assert opening_brace.value == "{", "Resolve table called without opening brace"
+    assert opening_brace.value == "{", (
+        "Resolve table called without opening brace")
 
     # TODO: Handle list tables too
 
@@ -132,7 +132,7 @@ def resolve_table(st):
         comment = resolve_comment(st)
 
     if st.done():
-        raise LuaError(f"End of file in table starting at {opening_brace.line}")
+        raise LuaError(f"EOF in table starting at {opening_brace.line}")
 
     if peek_name(st):
         name_token = st.take()
@@ -174,7 +174,7 @@ def resolve_table(st):
                 return True
             else:
                 if st.done():
-                    raise LuaError(f"Unexpected EOF")
+                    raise LuaError("Unexpected EOF")
                 else:
                     raise LuaError(f"Unexpected {token_str(st.get())}")
 
@@ -199,7 +199,11 @@ def resolve_rhs(st, comment=None):
         return resolve_table(st)
     elif st.peek_category("INTEGER"):
         t = st.take()
-        return Number(value=int(t.value), file_path=st.file_path, line_num=t.line, char_num=t.column)
+        return Number(
+            value=int(t.value),
+            file_path=st.file_path,
+            line_num=t.line,
+            char_num=t.column)
     elif peek_name(st):
         name = st.take()
         if peek_lparen(st):
@@ -216,11 +220,16 @@ def resolve_rhs(st, comment=None):
         return String(value=t.value[1:-1], file_path=st.file_path)
     elif peek_bool(st):
         t = st.take()
-        return Boolean(value=t.value, doc=None, line_num=t.line, char_num=t.column)
+        return Boolean(
+            value=t.value,
+            doc=None,
+            line_num=t.line,
+            char_num=t.column)
     elif peek_function(st):
         return resolve_anonymous_function(st, comment)
     else:
         raise LuaError(f"Unexpected {token_str(st.get())} {st.at()}")
+
 
 def resolve_rhs_list(st):
     if st.done():
@@ -229,7 +238,7 @@ def resolve_rhs_list(st):
     items = []
     first = resolve_rhs(st)
     if first is None:
-        raise LuaError(f"Nothing resolved on rhs around {token_str(st.prev())}")
+        raise LuaError(f"None resolved on rhs around {token_str(st.prev())}")
 
     items.append(first)
 
@@ -306,7 +315,6 @@ def peek_bool(st):
     return False
 
 
-
 def peek_comment(st):
     return _peek(st, category="COMMENT")
 
@@ -358,6 +366,7 @@ def eat_comment(st):
         pass
     return ate
 
+
 def eat_end(st):
     return _eat(st, "KEYWORD", "end")
 
@@ -397,8 +406,10 @@ def eat_function(st):
 def eat_return(st):
     return _eat(st, "KEYWORD", "return")
 
+
 def eat_assign(st):
     return _eat(st, "ASSIGN", "=")
+
 
 def resolve_name_list(st):
     names = []
@@ -428,7 +439,9 @@ def resolve_name_list(st):
         return True
 
     # Append the rest
-    while resolve_next(): pass
+    while resolve_next():
+        pass
+
     return names
 
 
@@ -462,7 +475,7 @@ def describe_name_or_index(name_or_index):
         index = name_or_index
         return ".".join(index)
     else:
-        assert False, f"Wrong type {name_or_index.__class__} passed to name_or_index"
+        assert False, f"Wrong type {name_or_index.__class__} passed to name_or_index"  # noqa: E501
 
 
 def resolve_arg_list(st):
@@ -487,7 +500,7 @@ def resolve_arg_list(st):
             comma = st.take()
             if not peek_name(st):
                 # Real lua fails on this when the function is _called_
-                raise LuaError(f"Trailing comma in arg-list at {comma.line}:{comma.column}")
+                raise LuaError(f"Trailing comma in arg-list at {comma.line}:{comma.column}")  # noqa: E501
             add_arg(st.take())
         else:
             # TODO Check what else can go here
@@ -520,7 +533,14 @@ def resolve_function(st, comment=None):
     rp = st.take()
     st.push_scope(rp.line, name)  # TODO: Include column + add args to scope
 
-    func = Function(name=name, args=args, doc=comment, file_path=st.file_path, line_num=name_token.line, char_num=name_token.column, names=names)
+    func = Function(
+        name=name,
+        args=args,
+        doc=comment,
+        file_path=st.file_path,
+        line_num=name_token.line,
+        char_num=name_token.column,
+        names=names)
     resolve_body(st, func)
 
     if not peek_end(st):
@@ -531,12 +551,18 @@ def resolve_function(st, comment=None):
 
 
 def resolve_anonymous_function(st, comment):
-    assert peek_function(st), "resolve_anonymous_function called without function-token"
+    assert peek_function(st), "resolve_anonymous_function called without function-token"  # noqa: E501
     fn = st.take()
     args = resolve_arg_list(st)
     rp = st.take()
-    st.push_scope(rp.line, f"anonymous at {fn.line}:{fn.column}") # TODO: Include args, column
-    func = Function(name=None, args=args, doc=comment, file_path=st.file_path, line_num=fn.line, char_num=fn.column)
+    st.push_scope(rp.line, f"anonymous at {fn.line}:{fn.column}")  # TODO: Include args, column # noqa: E501
+    func = Function(
+        name=None,
+        args=args,
+        doc=comment,
+        file_path=st.file_path,
+        line_num=fn.line,
+        char_num=fn.column)
     resolve_body(st, func)
     assert peek_end(st)
     kw_end = st.take()
@@ -546,13 +572,13 @@ def resolve_anonymous_function(st, comment):
 
 def resolve_local(st, comment=None):
     if st.done():
-        raise LuaError("Trailing local") # TODO Figure out proper error
+        raise LuaError("Trailing local")  # TODO Figure out proper error
 
     if peek_function(st):
         st.take()
         func = resolve_function(st, comment)
         if func is None:
-            raise LuaError("Function resolved to None?") # TODO: Figure out what to do here
+            raise LuaError("Function resolved to None?")  # TODO: Figure out what to do here # noqa: E501
         st.local_assign(func.name, func)
         return
 
@@ -571,14 +597,17 @@ def resolve_local(st, comment=None):
             for item in lhs_list:
                 assert isinstance(item, Name)  # TODO: Use lua_types.Name
                 name = item.t.value
-                st.local_assign(item.t.value, Uninitialized(name, st.file_path))
+                st.local_assign(
+                    item.t.value,
+                    Uninitialized(name, st.file_path))
     else:
         rhs_list = resolve_rhs_list(st)
 
         for num, lhs in enumerate(lhs_list):
             if num < len(rhs_list):
                 rhs = rhs_list[num]
-                # TODO If it isn't a call, then I should resolve the return value
+                # TODO If it isn't a call, then I should resolve the
+                # return value
                 obj = get_object(st, rhs)
                 st.local_assign(lhs.t.value, obj)
 
@@ -594,9 +623,10 @@ def resolve_global_assign(st, lhs_list):
             obj = get_object(st, rhs)
             st.global_assign(lhs.t.value, obj)
 
+
 def resolve_call_parameters(st):
     while not st.done() and not peek_rparen(st):
-        t = st.take() #  TODO: tossing parameters
+        st.take()  # TODO: tossing parameters
 
     if st.done():
         raise LuaError("<eof> in arglist")
@@ -606,9 +636,9 @@ def resolve_call(st, func_name_or_index):
     opening_paren = st.take()
 
     # TODO: Lua allows calls on a single table or string
-    assert opening_paren.value == "(", "resolve_call called without opening paren"
+    assert opening_paren.value == "(", "resolve_call called without opening paren"  # noqa: E501
 
-    parameters = resolve_call_parameters(st)
+    resolve_call_parameters(st)
     assert eat_rparen(st)  # TODO: LuaError
 
     func = get_object(st, func_name_or_index)
@@ -619,7 +649,10 @@ def resolve_call(st, func_name_or_index):
     if len(func.returns) > 0:
         if func.returns[0] in ["integer", "float", "number"]:
             # TODO: Convert already at comment parsing?
-            return Number(value=None, file_path=st.file_path, line_num=opening_paren.line)
+            return Number(
+                value=None,
+                file_path=st.file_path,
+                line_num=opening_paren.line)
 
         elif isinstance(func.returns[0], LuaItem):
             return func.returns[0]
@@ -629,6 +662,7 @@ def resolve_call(st, func_name_or_index):
 
 def resolve_comment(st):
     lines = []
+
     def add(token):
         lines.append(token.value)
 
@@ -650,13 +684,14 @@ def indexed_assign(st, index_list, value):
 
 
 def resolve_indexed_assign(st, index):
-    # TODO: Fuse with global_assign, pass an lhs that can contain indexes
-    # Differentiate between Name and Index. Maybe call it a reference or path or smth
-    # unless there's some obvious downside and I should do a recursive index structure.
+    # TODO: Fuse with global_assign, pass an lhs that can contain
+    # indexes Differentiate between Name and Index. Maybe call it a
+    # reference or path or smth unless there's some obvious downside
+    # and I should do a recursive index structure.
 
     rhs_list = resolve_rhs_list(st)
-    assert len(rhs_list) != 0, f"TODO: Nothing resolved for rhs around {st.prev()}"
-    assert len(rhs_list) == 1, f"TODO: Multi-value indexed assignment around {st.prev()}"
+    assert len(rhs_list) != 0, f"TODO: Nothing resolved for rhs around {st.prev()}"  # noqa: E501
+    assert len(rhs_list) == 1, f"TODO: Multi-value indexed assignment around {st.prev()}"  # noqa: E501
 
     rhs = rhs_list[0]
     target = get_object(st, index[:-1])
@@ -686,7 +721,6 @@ def resolve_token(st, outer_scope=True, func=None):
         # annotations
         return
 
-
     if eat_local(st):
         resolve_local(st, comment)
     elif st.peek_category("ID"):
@@ -714,7 +748,7 @@ def resolve_token(st, outer_scope=True, func=None):
                     resolve_call(st, index_list)
                     return
                 else:
-                    pass  #  TODO
+                    pass  # TODO
 
             if st.done():
                 raise LuaError("Unexpected EOF")
@@ -727,7 +761,7 @@ def resolve_token(st, outer_scope=True, func=None):
     elif eat_function(st):
         f = resolve_function(st, comment)
         if f is None:
-            raise LuaError("Could not resolve function") # TODO
+            raise LuaError("Could not resolve function")  # TODO
         if f.names is not None:
             indexed_assign(st, f.names, f)
         else:
@@ -748,7 +782,7 @@ def resolve_token(st, outer_scope=True, func=None):
 
     elif peek_end(st):
         if outer_scope:
-            raise LuaError(f"Unmatched end {token_str(st.get())}") #  TODO Proper error
+            raise LuaError(f"Unmatched end {token_str(st.get())}")  # TODO Proper error # noqa: E501
         return
     else:
         t2 = st.take()

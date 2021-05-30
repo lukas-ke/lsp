@@ -1,7 +1,11 @@
 from . import fragment
 from lsp import db
 from . import lua_types
-from lua.sillyparse import find_arglist_start, find_indexing_before, find_indexing_at
+from lua.sillyparse import (
+    find_arglist_start,
+    find_indexing_at,
+    find_indexing_before,
+)
 from lua.lua_doc import LuaDoc, EMPTY_ENV
 from lua.build_lua_doc import read_lua
 from lsp.lsp_defs import (
@@ -9,7 +13,6 @@ from lsp.lsp_defs import (
     CompletionItemKind,
     DefinitionParams,
     Hover,
-    HoverParams,
     Location,
     ParameterInformation,
     Position,
@@ -91,15 +94,19 @@ def complete_all(g_env):
 
 
 def complete_single(prefix, g_env, l_env) -> [CompletionItem]:
-    local_keys = [key for key in l_env.recursive_names() if key.startswith(prefix)]
-    local_completions = [make_completion(key, l_env[key]) for key in local_keys]
-    global_completions =  [make_completion(key, g_env[key])
-                           for key in g_env
-                           if key != "_G" and key.startswith(prefix) and key not in local_keys]
+    local_keys = [key for key in l_env.recursive_names()
+                  if key.startswith(prefix)]
+    local_completions = [make_completion(key, l_env[key])
+                         for key in local_keys]
+
+    global_completions = [make_completion(key, g_env[key])
+                          for key in g_env
+                          if key != "_G" and key.startswith(prefix)
+                          and key not in local_keys]
     return local_completions + global_completions
 
 
-def complete_index_list(index_list, g_env, l_env, include_f) -> [CompletionItem]:
+def complete_index_list(index_list, g_env, l_env, include_f):
     o = l_env.get(index_list[0])
     if o is None:
         o = g_env.get(index_list[0])
@@ -194,6 +201,7 @@ def stupid_type_definition(doc, position, g_env, l_env, log):
             start=Position(line=line_start, character=char_start),
             end=Position(line=line_start, character=char_start)))
 
+
 def method_path_fragment(path):
     if len(path) == 0:
         return False
@@ -214,9 +222,6 @@ class LuaDB(db.DB):
         # URI to LuaDoc
         self.lua_docs = {}
 
-    def set_lua_doc(uri: str, doc: LuaDoc):
-        self.lua_docs[uri] = doc
-
     def get_local_env(self, doc, position):
         ld = self.lua_docs.get(doc.uri)
         if ld is None:
@@ -224,9 +229,10 @@ class LuaDB(db.DB):
             return EMPTY_ENV
         l_env = ld.scope_at(position)
         if l_env is EMPTY_ENV:
-            self.log.info(f"Got EMPTY_ENV at {position.line}, {position.character}")
+            self.log.info(
+                f"Got EMPTY_ENV at {position.line}, {position.character}")
         else:
-            self.log.info(f"Got {l_env.scopeName} at {position.line}, {position.character}")
+            self.log.info(f"Got {l_env.scopeName} at {position.line}, {position.character}")  # noqa: E501
         return l_env
 
     def completions(self, doc, position):
@@ -253,8 +259,8 @@ class LuaDB(db.DB):
         else:
             if method:
                 # Only complete to functions
-                # TODO: Only complete to methods with matching type (or unspecified) type of
-                #       first argument (self)?
+                # TODO: Only complete to methods with matching type (or
+                #       unspecified) type of first argument (self)?
                 # (at least exclude 0-args? Maybe wrong due to Lua silliness)
                 def include_f(o):
                     return isinstance(o, lua_types.Function)
@@ -266,11 +272,13 @@ class LuaDB(db.DB):
 
     def typeDefinition(self, doc, position):
         l_env = self.get_local_env(doc, position)
-        return stupid_type_definition(doc, position, self.g_env, l_env, self.log)
+        return stupid_type_definition(
+            doc, position, self.g_env, l_env, self.log)
 
     def definition(self, doc, definitionParams: DefinitionParams) -> Location:
         l_env = self.get_local_env(doc, definitionParams)
-        return stupid_type_definition(doc, definitionParams, self.g_env, l_env, self.log)
+        return stupid_type_definition(
+            doc, definitionParams, self.g_env, l_env, self.log)
 
     def signatureHelp(self, doc, position):
         self.log.info(f"signatureHelp: {doc.line_at(position)}")
@@ -298,11 +306,6 @@ class LuaDB(db.DB):
             label=arg.name,
             documentation=arg.doc) for arg in func.args]
 
-        if func.name is None:
-            func_name = "function"
-        else:
-            func_name = func.name
-
         signature = SignatureInformation(
             label=func.signature_str(),
             documentation=func.get_doc(),  # TODO
@@ -318,7 +321,6 @@ class LuaDB(db.DB):
         self.log.info(str(signatureHelp.toDict()))
 
         return signatureHelp
-
 
     def hover(self, doc, hoverParams):
         try:
@@ -361,7 +363,7 @@ class LuaDB(db.DB):
             Position(line=end_line, character=end_char)))
 
     def didOpen(self, doc):
-        text = "\n".join(doc.lines) # TODO: I just had it as text
+        text = "\n".join(doc.lines)  # TODO: I just had it as text
         lua_doc = read_lua(text, self.g_env, doc.uri)
         self.log.info(f"read LuaDoc with {len(lua_doc.scopes)} scopes")
         self.log.info(lua_doc.pretty_str())

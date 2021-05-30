@@ -2,6 +2,7 @@ from lua.lua_types import EmptyEnv
 
 EMPTY_ENV = EmptyEnv()
 
+
 class LuaDoc:
     """A parsed representation of a Lua file.
 
@@ -20,6 +21,7 @@ class LuaDoc:
 
     def scope_at(self, pos):
         narrowest_matching = None
+
         def shorter_range(lhs):
             if narrowest_matching is None:
                 return True

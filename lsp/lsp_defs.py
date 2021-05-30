@@ -5,10 +5,11 @@ https://microsoft.github.io/language-server-protocol/specifications/specificatio
 Used for parsing JSON-rpc requests and responding to them.
 
 """
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse
 from urllib.request import url2pathname
 from pathlib import Path
 import os
+
 
 def assert_type_or_None(v, t):
     assert v is None or isinstance(v, t)
@@ -350,7 +351,7 @@ class ResponseError:
 
 
 class CompletionItem:
-    def __init__(self, label: str, kind: CompletionItemKind=None):
+    def __init__(self, label: str, kind: CompletionItemKind = None):
         self.label = label
         self.kind = kind
 

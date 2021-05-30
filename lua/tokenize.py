@@ -4,7 +4,12 @@ import lua.lua_re as lua_re
 # Based on the pretty neat example at
 # https://docs.python.org/3/library/re.html#writing-a-tokenizer
 
-Token = collections.namedtuple('Token', ['category', 'value', 'line', 'column'])
+Token = collections.namedtuple(
+    'Token', [
+        'category',
+        'value',
+        'line',
+        'column'])
 
 
 class TokenError(Exception):
