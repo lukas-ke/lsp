@@ -26,6 +26,11 @@ class LuaBaseError(Exception):
         self.line_num = line_num
         self.char_num = char_num
 
+    def get_message(self):
+        return f"{self.get_prefix()} {self.args[0]}"
+
+    def get_prefix(self):
+        return ""
 
 class LuaError(LuaBaseError):
     """Raised for Lua syntax errors"""
@@ -34,11 +39,13 @@ class LuaError(LuaBaseError):
 
 class TODOError(LuaBaseError):
     """Raised for incomplete features in the parser"""
-    pass
+
+    def get_prefix(self):
+        return "TODO:"
 
 
 def to_diagnostic(e: LuaBaseError):
     pos = Position(line=e.line_num, character=e.char_num)
     return Diagnostic(
         range=Range(start=pos, end=pos),
-        message=e.args[0])
+        message=e.get_message())

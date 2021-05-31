@@ -146,7 +146,7 @@ def resolve_table(st):
         else:
             # TODO: Unexpected entry in table.
             # could be e.g. a number for lists
-            assert False, f"Table issue {st.at()}"
+            raise TODOError("Table issue", *st.at())
 
     comment = None
 
@@ -460,8 +460,22 @@ def get_object(st, obj):
         if len(obj) == 0:
             return None  # TODO: Happens e.g. for "trailing-period-assign.lua"
         t = st.get_object(obj[0])
-        for key in obj[1:]:
-            t = t.get(key)
+        if t is None:
+            raise LuaError(f"Unknown name: {obj[0]}", *st.at())  # TODO: Don't terminate on this
+        for num, key in enumerate(obj[1:]):
+            try:
+                t = t.get(key)
+            except AttributeError:
+                # Non-table lookup
+                # TODO: Don't raise (=fail) on this, just resolve to
+                # e.g. Uninitialized/Unknown, and add the error to the
+                # list in st
+                index_str = ".".join(obj[0:num + 1])
+                # TODO Include object type at {index_str} (e.g. function or whatever)
+                raise LuaError(f"{index_str} not indexable", *st.at())
+            if t is None:
+                index_str = ".".join(obj[0:num + 1])
+                raise LuaError(f"{index_str} has no item with key {key}", *st.at())
             if t is None:
                 return Unknown(name=".".join(obj), file_path=st.file_path)
         return t
@@ -605,7 +619,10 @@ def resolve_local(st, comment=None):
                     item.t.value,
                     Uninitialized(name, st.file_path))
     else:
+        # Assignment
         rhs_list = resolve_rhs_list(st)
+        if rhs_list == None:
+            raise LuaError("Missing rhs for assignment", *st.at())
 
         for num, lhs in enumerate(lhs_list):
             if num < len(rhs_list):
@@ -694,8 +711,12 @@ def resolve_indexed_assign(st, index):
     # and I should do a recursive index structure.
 
     rhs_list = resolve_rhs_list(st)
-    assert len(rhs_list) != 0, f"TODO: Nothing resolved for rhs around {st.prev()}"  # noqa: E501
-    assert len(rhs_list) == 1, f"TODO: Multi-value indexed assignment around {st.prev()}"  # noqa: E501
+
+    if rhs_list is None or len(rhs_list) == 0:
+        raise LuaError(f"Missing rhs for assignment around {st.prev()}", *st.at())
+
+    if len(rhs_list) != 1:
+        raise TODOError(f"Multi-value indexed assignment around {st.prev()}", *st.at)
 
     rhs = rhs_list[0]
     target = get_object(st, index[:-1])
