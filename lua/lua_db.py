@@ -20,6 +20,7 @@ from lsp.lsp_defs import (
     Range,
     SignatureHelp,
     SignatureInformation,
+    TextDocumentSyncKind,
     uri_to_path,
 )
 import lsp.lsp_defs as lsp_defs
@@ -27,7 +28,7 @@ from . import lua_re
 from pathlib import Path
 from typing import Mapping
 import lua.error
-
+from lua.cmdline import get_default_lua_server_options
 LUA_TYPE_TO_LSP_KIND = {
     lua_types.Number: CompletionItemKind.Value,
     lua_types.Function: CompletionItemKind.Function,
@@ -213,13 +214,21 @@ def method_path_fragment(path):
     return last_item[-1] == ":"
 
 
+def _or_default_options(options):
+    if options is None:
+        return get_default_lua_server_options()
+    else:
+        return options
+
+
 class LuaDB(db.DB):
     lua_docs: Mapping[str, LuaDoc]
 
-    def __init__(self, lua_path, g_env, log):
+    def __init__(self, lua_path, g_env, log, options=None):
         self.lua_path = lua_path
         self.g_env = g_env
         self.log = log.prefixed("[LuaDB] ")
+        self.options = _or_default_options(options)
 
         # URI to LuaDoc
         self.lua_docs = {}
@@ -388,3 +397,29 @@ class LuaDB(db.DB):
             uri=doc.uri,
             version=doc.version,
             diagnostics=diagnostics)
+
+    def get_capabilities(self):
+        capabilities = {
+            "completionProvider": {
+                # "CompletionOptions"
+                "workDoneProgress": False,
+                "triggerCharacters": [".", ":"],
+                "resolveProvider": False},
+            "definitionProvider": {
+                # "DefinitionOptions"
+                "workDoneProgress": False},
+            "typeDefinitionProvider": {
+                "workDoneProgress": False},
+            "textDocumentSync": {
+                "openClose": True,
+                "change": TextDocumentSyncKind.Incremental
+            },
+            "documentLinkProvider": {
+                "resolveProvider": True
+            },
+            "signatureHelpProvider": {
+                "triggerCharacters": ["("]
+            },
+        }
+        capabilities["hoverProvider"] = True
+        return capabilities

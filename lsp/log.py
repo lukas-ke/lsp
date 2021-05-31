@@ -35,6 +35,8 @@ class Log:
             self.log_file.flush()
 
 
+# For creating a Log instance in a with-statement to ensure the file
+# it writes to is closed at the end.
 @contextlib.contextmanager
 def file_logger(log_file_path, log_level, prefix=""):
     if log_level > 0:
@@ -66,7 +68,7 @@ class StdoutLog:
             print(error_message(self.prefix, msg))
 
 
-# Just for symmetry with file_logger
+# For symmetry with file_logger
 @contextlib.contextmanager
 def stdout_logger(log_level, prefix=""):
     yield StdoutLog(log_level, prefix)
@@ -82,7 +84,8 @@ class NullLog:
     def error(self, *args):
         pass
 
-# Just for symmetry with file_logger
+
+# For symmetry with file_logger
 @contextlib.contextmanager
 def null_logger():
     yield NullLog()

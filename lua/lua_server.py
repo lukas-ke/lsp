@@ -17,14 +17,14 @@ def get_workspace_dir():
     return workspace_dir.absolute()
 
 
-def create_db(log):
+def create_db(log, options):
     g_env = GlobalEnv()
     ws = get_workspace_dir()
     module_path = ws / "some_globals.lua"
     build_lua_doc.read_file(module_path, g_env)
     lua_path = (str(ws) + "/?.lua").replace("\\", "/")
     add_built_ins(g_env)
-    db = LuaDB(lua_path, g_env, log)
+    db = LuaDB(lua_path, g_env, log, options)
     return db
 
 
@@ -35,9 +35,10 @@ def get_logger(options):
     else:
         return lsp.log.null_logger()
 
+
 def run():
     options = get_lua_server_options()
     with get_logger(options) as log:
-        db = create_db(log)
+        db = create_db(log, options)
         exit_code = lsp_io_server.run(db, log)
         exit(exit_code)

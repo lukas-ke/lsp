@@ -10,7 +10,6 @@ from lsp.lsp_defs import (
     TextDocumentContentChangeEvent,
     TextDocumentIdentifier,
     TextDocumentPositionParams,
-    TextDocumentSyncKind,
 )
 from . doc import Document
 
@@ -88,31 +87,8 @@ class LSP_state:
         # .. notification. This will allow the exit of a server without
         # .. an initialize request.
         # TODO: Move capabilities to lua_db etc.
-        capabilities = {
-            "completionProvider": {
-                # "CompletionOptions"
-                "workDoneProgress": False,
-                "triggerCharacters": [".", ":"],
-                "resolveProvider": False},
-            "definitionProvider": {
-                # "DefinitionOptions"
-                "workDoneProgress": False},
-            "typeDefinitionProvider": {
-                "workDoneProgress": False},
-            "textDocumentSync": {
-                "openClose": True,
-                "change": TextDocumentSyncKind.Incremental
-            },
-            "documentLinkProvider": {
-                "resolveProvider": True
-            },
-            "signatureHelpProvider": {
-                "triggerCharacters": ["("]
-            },
-        }
 
-        capabilities["hoverProvider"] = True
-
+        capabilities = self.db.get_capabilities()
         return make_response(content["id"], InitializeResult(
             capabilities=capabilities,
             serverInfo={

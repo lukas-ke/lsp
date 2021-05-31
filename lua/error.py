@@ -32,6 +32,7 @@ class LuaBaseError(Exception):
     def get_prefix(self):
         return ""
 
+
 class LuaError(LuaBaseError):
     """Raised for Lua syntax errors"""
     pass
