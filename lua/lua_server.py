@@ -1,5 +1,6 @@
+from lua.cmdline import get_lua_server_options
 from lsp_server import lsp_io_server
-from lsp.log import file_logger
+import lsp.log
 from lua import build_lua_doc
 from lua.builtins import add_built_ins
 from lua.lua_db import LuaDB
@@ -27,9 +28,16 @@ def create_db(log):
     return db
 
 
+def get_logger(options):
+    if options.enable_log:
+        log_path = lsp_io_server.get_server_log_path()
+        return lsp.log.file_logger(log_path, 2)
+    else:
+        return lsp.log.null_logger()
+
 def run():
-    log_path = lsp_io_server.get_server_log_path()
-    with file_logger(log_path, 2) as log:
+    options = get_lua_server_options()
+    with get_logger(options) as log:
         db = create_db(log)
         exit_code = lsp_io_server.run(db, log)
         exit(exit_code)

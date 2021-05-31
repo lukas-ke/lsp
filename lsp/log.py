@@ -81,3 +81,8 @@ class NullLog:
 
     def error(self, *args):
         pass
+
+# Just for symmetry with file_logger
+@contextlib.contextmanager
+def null_logger():
+    yield NullLog()
