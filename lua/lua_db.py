@@ -334,6 +334,8 @@ class LuaDB(db.DB):
         return signatureHelp
 
     def hover(self, doc, hoverParams):
+        # TODO: Do what if enable_hover is false
+        # yet client calls the method?
         try:
             index_info = find_indexing_at(
                 doc.line_n,
@@ -421,5 +423,8 @@ class LuaDB(db.DB):
                 "triggerCharacters": ["("]
             },
         }
-        capabilities["hoverProvider"] = True
+
+        if self.options.enable_hover:
+            capabilities["hoverProvider"] = True
+
         return capabilities

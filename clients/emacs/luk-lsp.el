@@ -34,11 +34,17 @@
   :type 'string
   :group 'luk-lsp-lua)
 
+(defcustom luk-lsp-lua-server-options
+  nil
+  "Command line options for the server"
+  :type '(repeat (string))
+  :group 'luk-lsp-lua)
+
 (defun luk-lsp-lua--create-connection ()
   "Create connection to my lua language server."
   (lsp-stdio-connection
    (lambda ()
-     (list luk-lsp-lua-python-command luk-lsp-lua-server-path))
+     (append (list luk-lsp-lua-python-command luk-lsp-lua-server-path) luk-lsp-lua-server-options))
    (lambda ()
      (f-exists? luk-lsp-lua-server-path))))
 
