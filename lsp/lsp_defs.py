@@ -81,6 +81,32 @@ def uri_to_path(uri):
     return Path(p)
 
 
+class WorkDoneProgressOptions:
+    def __init__(self, workDoneProgress: bool):
+        self.workDoneProgress = workDoneProgress
+
+    def toDict(self):
+        return {"workDoneProgress": self.workDoneProgress}
+
+
+class CompletionOptions(WorkDoneProgressOptions):
+    def __init__(
+            self,
+            workDoneProgress: bool,
+            triggerCharacters,
+            resolveProvider: bool):
+        super().__init__(workDoneProgress)
+        self.triggerCharacters = triggerCharacters
+        self.resolveProvider = resolveProvider
+
+    def toDict(self):
+        d = super().toDict()
+        d.update({
+            "triggerCharacters": self.triggerCharacters,
+            "resolveProvider": self.resolveProvider})
+        return d
+
+
 class Diagnostic:
     def __init__(
             self,

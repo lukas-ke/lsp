@@ -11,6 +11,7 @@ from lua.build_lua_doc import read_lua
 from lsp.lsp_defs import (
     CompletionItem,
     CompletionItemKind,
+    CompletionOptions,
     DefinitionParams,
     Hover,
     Location,
@@ -401,28 +402,30 @@ class LuaDB(db.DB):
             diagnostics=diagnostics)
 
     def get_capabilities(self):
-        capabilities = {
-            "completionProvider": {
-                # "CompletionOptions"
-                "workDoneProgress": False,
-                "triggerCharacters": [".", ":"],
-                "resolveProvider": False},
-            "definitionProvider": {
-                # "DefinitionOptions"
-                "workDoneProgress": False},
-            "typeDefinitionProvider": {
-                "workDoneProgress": False},
-            "textDocumentSync": {
-                "openClose": True,
-                "change": TextDocumentSyncKind.Incremental
-            },
-            "documentLinkProvider": {
-                "resolveProvider": True
-            },
-            "signatureHelpProvider": {
-                "triggerCharacters": ["("]
-            },
+        capabilities = {}
+
+        capabilities["completionProvider"] = CompletionOptions(
+            workDoneProgress=True,
+            triggerCharacters=[".", ":"],
+            resolveProvider=False).toDict()
+
+        capabilities["definitionProvider"] = {
+            # "DefinitionOptions"
+            "workDoneProgress": False}
+
+        capabilities["typeDefinitionProvider"] = {
+            "workDoneProgress": False}
+
+        capabilities["textDocumentSync"] = {
+            "openClose": True,
+            "change": TextDocumentSyncKind.Incremental}
+
+        capabilities["documentLinkProvider"] = {
+            "resolveProvider": True
         }
+
+        capabilities["signatureHelpProvider"] = {
+            "triggerCharacters": ["("]}
 
         if self.options.enable_hover:
             capabilities["hoverProvider"] = True
