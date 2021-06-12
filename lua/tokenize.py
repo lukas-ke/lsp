@@ -13,7 +13,11 @@ Token = collections.namedtuple(
 
 
 class TokenError(Exception):
-    pass
+    def __init__(self, value, line, column):
+        super().__init__(self, f'Unexpected "{value}" at {line}:{column}')
+        self.value = value
+        self.line = line
+        self.column = column
 
 
 def read_next(text):
@@ -29,7 +33,7 @@ def read_next(text):
             pass
         elif kind == 'MISMATCH':
             # TODO: Store current state
-            raise TokenError('%r unexpected on line %d' % (value, line_num))
+            raise TokenError(value, line_num, column)
         else:
             if kind == 'ID' and value in lua_re.keywords:
                 kind = "KEYWORD"
@@ -39,14 +43,18 @@ def read_next(text):
 
 def tokenize(text):
     tokens = []
+    errors = []
     try:
         for t in read_next(text):
             tokens.append(t)
-    except TokenError:
-        # TODO: Return error info too
-        pass
+    except TokenError as e:
+        # Note: List will have zero or one error, since the iteration
+        # stops, which is probably for the best (the mismatch could be
+        # passed on to allow for more context, but that would make the
+        # later stages more complicated).
+        errors.append(e)
 
-    return tokens
+    return tokens, errors
 
 
 def token_str(t):

@@ -9,11 +9,15 @@ to a certain point.
 from . tokenize import tokenize
 from . scope import find_scopes_plus_errors
 from . lua_doc import LuaDoc
-
+from . error import LuaError
 
 def read_lua(text, g_env, file_path=None) -> LuaDoc:
-    tokens = tokenize(text)
+    tokens, token_errors = tokenize(text)
     scopes, errors = find_scopes_plus_errors(tokens, g_env, file_path)
+
+    for te in token_errors:
+        errors.append(LuaError(f'Unexpected "{te.value}"', te.line, te.column))
+
     return LuaDoc(scopes=scopes, errors=errors)
 
 
