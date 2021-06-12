@@ -10,7 +10,7 @@ def add_built_ins(d):
         name="print",
         args=[Arg(name="...")],
         doc=Comment(
-            "Receives any number of arguments and prints their values to"
+            "Receives any number of arguments and prints their values to "
             "stdout, using the tostring function to convert each argument "
             "to a string.\n\n"
             "print is not intended for formatted output, but only as a "

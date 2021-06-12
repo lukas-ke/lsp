@@ -9,7 +9,8 @@ def _get_parser():
     disable_opts = [
         ("log", "Disable writing to server log file"),
         ("hover", "Disable hover information"),
-        ("local-env", "Disable local environments, only do completion on names in globals parsed as a library on start-up with --load-module")
+        ("local-env", "Disable local environments, only do completion on names in globals parsed as a library on start-up with --load-module"),
+        ("built-ins", "Disable hard-coded definitions for built-in Lua functions"),
     ]
 
     group = parser.add_argument_group(
