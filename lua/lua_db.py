@@ -393,17 +393,17 @@ class LuaDB(db.DB):
         self.lua_docs[doc.uri] = lua_doc
 
     def get_PublishDiagnosticsParams(self, doc):
-        lua_doc = self.lua_docs.get(doc.uri)
-        if lua_doc is None:
-            return []
 
-        errors = lua_doc.errors
-        lua_doc = self.lua_docs[doc.uri]
-        diagnostics = [lua.error.to_diagnostic(e) for e in errors]
+        def get_diagnostics():
+            lua_doc = self.lua_docs.get(doc.uri)
+            return (
+                [] if lua_doc is None else
+                [lua.error.to_diagnostic(e) for e in lua_doc.errors])
+
         return PublishDiagnosticsParams(
             uri=doc.uri,
             version=doc.version,
-            diagnostics=diagnostics)
+            diagnostics=get_diagnostics())
 
     def get_capabilities(self):
         capabilities = {}

@@ -226,7 +226,7 @@ class LSP_state:
         return make_response(content["id"], hover)
 
     def _textDocument_documentLink(self, content):
-        return make_response(content["id"], [])
+        return make_response(content["id"], None)
 
     def _get_diagnostics_notification(self, doc) -> NotificationMessage:
         # TODO: Only if client has
