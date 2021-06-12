@@ -18,6 +18,6 @@ def read_lua(text, g_env, file_path=None) -> LuaDoc:
 
 
 def read_file(file_path, g_env) -> LuaDoc:
-    with open(file_path, "r") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
         return read_lua(text, g_env, file_path)

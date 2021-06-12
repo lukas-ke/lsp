@@ -20,9 +20,9 @@ def get_workspace_dir():
 def create_db(log, options):
     g_env = GlobalEnv()
     ws = get_workspace_dir()
-    module_path = ws / "some_globals.lua"
-    build_lua_doc.read_file(module_path, g_env)
     lua_path = (str(ws) + "/?.lua").replace("\\", "/")
+    for module_path in options.load_modules:
+        build_lua_doc.read_file(module_path, g_env)
     add_built_ins(g_env)
     db = LuaDB(lua_path, g_env, log, options)
     return db

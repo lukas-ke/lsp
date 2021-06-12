@@ -376,6 +376,8 @@ class LuaDB(db.DB):
             Position(line=end_line, character=end_char)))
 
     def didOpen(self, doc):
+        if not self.options.enable_local_env:
+            return
         text = "\n".join(doc.lines)  # TODO: I just had it as text
         lua_doc = read_lua(text, self.g_env, doc.uri)
         self.log.info(f"read LuaDoc with {len(lua_doc.scopes)} scopes")
@@ -383,6 +385,8 @@ class LuaDB(db.DB):
         self.lua_docs[doc.uri] = lua_doc
 
     def didChange(self, doc):
+        if not self.options.enable_local_env:
+            return
         text = "\n".join(doc.lines)
         lua_doc = read_lua(text, self.g_env, doc.uri)
         self.log.info(f"re-read LuaDoc with {len(lua_doc.scopes)} scopes")
