@@ -11,6 +11,7 @@ def _get_parser():
         ("hover", "Disable hover information"),
         ("local-env", "Disable local environments, only do completion on names in globals parsed as a library on start-up with --load-module"),
         ("built-ins", "Disable hard-coded definitions for built-in Lua functions"),
+        ("diagnostics", "Disable diagnostics notifications for Lua code errors (as interpreted by the hacky lua-parser). Only relevant when not using --disable-local-env"),
     ]
 
     group = parser.add_argument_group(

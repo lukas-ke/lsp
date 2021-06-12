@@ -179,7 +179,8 @@ class LSP_state:
         # TODO: Only if client has
         # PublishDiagnosticsClientCapabilities
         msg_diag = self._get_diagnostics_notification(doc)
-        return msg_diag.toDict()
+        if msg_diag is not None:
+            return msg_diag.toDict()
 
     def _textDocument_didClose(self, content):
         p = DidCloseTextDocumentParams.fromDict(content["params"])
@@ -212,7 +213,8 @@ class LSP_state:
         # TODO: Only if client has
         # PublishDiagnosticsClientCapabilities
         msg_diag = self._get_diagnostics_notification(doc)
-        return msg_diag.toDict()
+        if msg_diag is not None:
+            return msg_diag.toDict()
 
     def _textDocument_signatureHelp(self, content):
         p = SignatureHelpParams.fromDict(content["params"])
@@ -232,6 +234,8 @@ class LSP_state:
         # TODO: Only if client has
         # PublishDiagnosticsClientCapabilities
         diagnostics = self.db.get_PublishDiagnosticsParams(doc)
+        if diagnostics is None:
+            return None
         return NotificationMessage(
             "textDocument/publishDiagnostics",
             diagnostics)

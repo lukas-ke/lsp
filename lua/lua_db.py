@@ -393,6 +393,9 @@ class LuaDB(db.DB):
         self.lua_docs[doc.uri] = lua_doc
 
     def get_PublishDiagnosticsParams(self, doc):
+        """Returns PublishDiagnosticsParams or None."""
+        if not self.options.enable_diagnostics:
+            return None
 
         def get_diagnostics():
             lua_doc = self.lua_docs.get(doc.uri)
