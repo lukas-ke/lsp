@@ -25,7 +25,7 @@ class Parser:
             content.append(data)
             if data == b"\n":
                 if content[-4:] == header_end:
-                    return parse_header(b"".join(content[:-2]), self.log)
+                    return parse_header(b"".join(content[:-2]))
 
     def _read_content(self, length):
         raw_content = sys.stdin.buffer.read(length)

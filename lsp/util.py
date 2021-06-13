@@ -2,15 +2,10 @@ import json
 from . lsp_defs import ResponseError
 
 
-class Header:
-    ContentLength = None
-    ContentType = None
-
-
 header_end = [b"\r", b"\n", b"\r", b"\n"]
 
 
-def parse_header(b, log):
+def parse_header(b):
     fields = b.split(b"\r\n")
     header = {}
     for num, f in enumerate(fields):
